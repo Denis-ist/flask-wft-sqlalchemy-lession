@@ -9,7 +9,7 @@ def index():
     email = session.get('email', False)
     return render_template('index.html', email=email)
 
-
+# Регистрация
 @app.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     form = RegistrationForm()
