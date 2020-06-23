@@ -2,8 +2,8 @@
 
 {% block content %}
     <h1 class="display-4">Добро пожаловать
-        {%if email %}
-        <b>{{ email }}!</b>
-        {%endif%}
-        </h1>
+        {% if email %}
+            <b>{{ email }}</b>
+        {% endif %}
+    </h1>
 {% endblock content %}

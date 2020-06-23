@@ -12,13 +12,13 @@
   </head>
   <body>
     <div class="container">
-      {% if error is defined %}
-        <div class="alert alert-warning mt-3">
-        {{ error }}
-        </div>
-    {% endif %}
-        {% block content %}
+        {% if error is defined %}
+            <div class="alert alert-warning mt-3">
+            {{ error }}
+            </div>
+        {% endif %}
 
+        {% block content %}
         {% endblock content %}
     </div>
     <!-- Optional JavaScript -->

@@ -9,7 +9,7 @@ def index():
     email = session.get('email', False)
     return render_template('index.html', email=email)
 
-# Регистрация
+
 @app.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     form = RegistrationForm()
@@ -24,8 +24,15 @@ def sign_up():
         }
         if User.query.filter(User.email == register_data['email']).one_or_none() is not None:
             return render_template('registration.html', form=form, error="Такой пользователь уже существует!")
-        new_user = User(email=register_data['email'], password=register_data['password'], name=register_data['name'])
-
+        new_user = User(
+            email=register_data['email'],
+            password=register_data['password'],
+            name=register_data['name'],
+            age=register_data['age'],
+            sex=register_data['sex'],
+            about=register_data['about_me'],
+        )
+        session['email'] = register_data['email']
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('index'))
@@ -44,7 +51,7 @@ def login():
         user_db = User.query.filter(User.email == login_data['email']).one_or_none()
         if getattr(user_db, 'password', None) != login_data['password']:
             return render_template('login.html', title='Войти на сайт', form=form,
-                                   error='Неверный логин/пароль')
-        session['email'] = user_db.email
-        return redirect(url_for("index"))
+                                   error="Неправильный логин или пароль!")
+        session['email'] = login_data['email']
+        return redirect(url_for('index'))
     return render_template('login.html', title='Войти на сайт', form=form)
