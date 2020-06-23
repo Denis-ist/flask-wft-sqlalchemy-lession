@@ -6,7 +6,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(128), unique=True)
     name = db.Column(db.String)
-    password = db.Column(db.String())
+    password_hash = db.Column(db.String())
     age = db.Column(db.Integer)
     sex = db.Column(db.String(10))
     about_me = db.Column(db.String)
@@ -31,3 +31,5 @@ class Post(db.Model):
 
     def __repr__(self):
         return f'<Post text={self.text}>'
+
+
