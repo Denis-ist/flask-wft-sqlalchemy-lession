@@ -3,11 +3,21 @@ from flask import render_template, redirect, url_for, session
 from app.models import User, Post
 from app.forms import RegistrationForm, LoginForm, PostForm
 from datetime import datetime
+from app import login
+from flask_login import login_user, logout_user, current_user
+
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 
 @app.route('/')
 def index():
-    email = session.get('email', False)
+    email = None
+    # email = session.get('email', False)
+    if current_user.is_authenticated:
+        email = current_user.email
     posts = Post.query.all()
     return render_template('index.html', email=email, posts=posts)
 
@@ -27,6 +37,7 @@ def create_post():
         )
         db.session.add(new_post)
         db.session.commit()
+        login_user(user)
         return redirect(url_for('index'))
     return render_template('create_post.html', form=form)
 
@@ -53,7 +64,8 @@ def sign_up():
             about_me=register_data['about_me'],
         )
         new_user.set_password(register_data['password'])
-        session['email'] = register_data['email']
+        # session['email'] = register_data['email']
+        # login_user(new_user)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('index'))
@@ -73,6 +85,12 @@ def login():
         if user_db is None or not user_db.check_password(login_data['password']):
             return render_template('login.html', title='Войти на сайт', form=form,
                                    error="Неправильный логин или пароль!")
-        session['email'] = login_data['email']
+        # session['email'] = login_data['email']
         return redirect(url_for('index'))
     return render_template('login.html', title='Войти на сайт', form=form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
