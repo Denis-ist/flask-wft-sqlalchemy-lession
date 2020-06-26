@@ -15,7 +15,6 @@ def load_user(id):
 @app.route('/')
 def index():
     email = None
-    # email = session.get('email', False)
     if current_user.is_authenticated:
         email = current_user.email
     posts = Post.query.all()
@@ -64,11 +63,9 @@ def sign_up():
             about_me=register_data['about_me'],
         )
         new_user.set_password(register_data['password'])
-        # session['email'] = register_data['email']
-        # login_user(new_user)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
     return render_template('registration.html', form=form)
 
 
@@ -85,7 +82,6 @@ def login():
         if user_db is None or not user_db.check_password(login_data['password']):
             return render_template('login.html', title='Войти на сайт', form=form,
                                    error="Неправильный логин или пароль!")
-        # session['email'] = login_data['email']
         return redirect(url_for('index'))
     return render_template('login.html', title='Войти на сайт', form=form)
 
