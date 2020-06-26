@@ -9,7 +9,7 @@ from flask import redirect, url_for
 class ModelViewSecured(ModelView):
     def is_accessible(self):
         if current_user.is_authenticated:
-            return current_user.email == "ya@yandex.ru"
+            return current_user.email == 'moscow1@itstep.org'
         return False
 
     def inaccessible_callback(self, name, **kwargs):

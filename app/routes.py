@@ -1,5 +1,5 @@
 from app import app, db
-from flask import render_template, redirect, url_for, session
+from flask import render_template, redirect, url_for
 from app.models import User, Post
 from app.forms import RegistrationForm, LoginForm, PostForm
 from datetime import datetime
@@ -24,9 +24,6 @@ def index():
 @app.route('/new', methods=['GET', 'POST'])
 @login_required
 def create_post():
-    # email_user = session.get('email', False)
-    # if not email_user:
-    #     return redirect(url_for('index'))
     form = PostForm()
     if form.validate_on_submit():
         user = User.query.filter(User.email == current_user.email).one()
@@ -37,7 +34,6 @@ def create_post():
         )
         db.session.add(new_post)
         db.session.commit()
-
         return redirect(url_for('index'))
     return render_template('create_post.html', form=form)
 
@@ -72,8 +68,8 @@ def sign_up():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
     form = LoginForm()
+    error = None
     if form.validate_on_submit():
         login_data = {
             'email': form.email.data,
@@ -83,8 +79,10 @@ def login():
         user_db = User.query.filter(User.email == login_data['email']).one_or_none()
         if user_db is not None and user_db.check_password(login_data['password']):
             login_user(user_db)
+            app.logger.info(f'Пользователь [{user_db.name}] успешно вошел на сайт')
             return redirect(url_for('index'))
-        error = 'Неверный пароль'
+        error = "Неправильный логин или пароль!"
+        app.logger.error(error)
     return render_template('login.html', title='Войти на сайт', form=form, error=error)
 
 
