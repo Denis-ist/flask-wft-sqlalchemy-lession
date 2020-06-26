@@ -4,7 +4,7 @@ from app.models import User, Post
 from app.forms import RegistrationForm, LoginForm, PostForm
 from datetime import datetime
 from app import login
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_user, logout_user, current_user, login_required
 
 
 @login.user_loader
@@ -22,13 +22,14 @@ def index():
 
 
 @app.route('/new', methods=['GET', 'POST'])
+@login_required
 def create_post():
-    email_user = session.get('email', False)
-    if not email_user:
-        return redirect(url_for('index'))
+    # email_user = session.get('email', False)
+    # if not email_user:
+    #     return redirect(url_for('index'))
     form = PostForm()
     if form.validate_on_submit():
-        user = User.query.filter(User.email == email_user).one()
+        user = User.query.filter(User.email == current_user.email).one()
         new_post = Post(
             text=form.text.data,
             date_created=datetime.now(),
@@ -36,7 +37,7 @@ def create_post():
         )
         db.session.add(new_post)
         db.session.commit()
-        login_user(user)
+
         return redirect(url_for('index'))
     return render_template('create_post.html', form=form)
 
@@ -71,6 +72,7 @@ def sign_up():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error = None
     form = LoginForm()
     if form.validate_on_submit():
         login_data = {
@@ -79,11 +81,11 @@ def login():
             'remember_me': form.remember_me.data
         }
         user_db = User.query.filter(User.email == login_data['email']).one_or_none()
-        if user_db is None or not user_db.check_password(login_data['password']):
-            return render_template('login.html', title='Войти на сайт', form=form,
-                                   error="Неправильный логин или пароль!")
-        return redirect(url_for('index'))
-    return render_template('login.html', title='Войти на сайт', form=form)
+        if user_db is not None and user_db.check_password(login_data['password']):
+            login_user(user_db)
+            return redirect(url_for('index'))
+        error = 'Неверный пароль'
+    return render_template('login.html', title='Войти на сайт', form=form, error=error)
 
 
 @app.route('/logout')
