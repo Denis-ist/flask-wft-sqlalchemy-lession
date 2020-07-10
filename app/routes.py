@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from app import app, db
 from flask import render_template, redirect, url_for
 from app.models import User, Post
@@ -18,7 +19,24 @@ def index():
     if current_user.is_authenticated:
         email = current_user.email
     posts = Post.query.all()
+    for i, post in enumerate(posts):
+        preview_text = ''
+        word_count = 0
+        for word in post.text.split():
+            preview_text += word + ' '
+            word_count += 1
+            if word_count == 20:
+                break
+        posts[i].text = preview_text.rstrip()
+        if word_count == 20:
+            posts[i].text += '...'
     return render_template('index.html', email=email, posts=posts)
+
+
+@app.route('/posts/<int:id_post>')
+def view_post(id_post):
+    post = Post.query.get(id_post)
+    return render_template('view_post.html', post=post)
 
 
 @app.route('/new', methods=['GET', 'POST'])
@@ -28,6 +46,7 @@ def create_post():
     if form.validate_on_submit():
         user = User.query.filter(User.email == current_user.email).one()
         new_post = Post(
+            heading=form.heading.data,
             text=form.text.data,
             date_created=datetime.now(),
             author_id=user.id
